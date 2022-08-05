@@ -20,6 +20,9 @@ React Context is a comfortable tool to use as a React developer because it comes
 ```bash
 npm install --save @air/react-memoized-context
 ```
+```bash
+yarn add @air/react-memoized-context
+```
 
 ## Usage
 
