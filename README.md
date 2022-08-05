@@ -8,7 +8,7 @@
 </p>
 
 ## About
-React Context is a comfortable tool to use as a React developer because it comes bundled with React. And it uses a familiar pattern that you as a React develop enjoy. The [downsides](https://blog.thoughtspile.tech/2021/10/04/react-context-dangers/) of React Context are known and this was our approach
+React Context is a comfortable tool to use as a React developer because it comes bundled with React. And it uses a familiar pattern that you as a React develop enjoy. The [downsides](https://blog.thoughtspile.tech/2021/10/04/react-context-dangers/) of React Context are known and this was our approach at Air to solve it. We've looked at [use-context-selector](https://github.com/dai-shi/use-context-selector) but it had too many issues so we decided to roll our own.
 
 ## Install
 
