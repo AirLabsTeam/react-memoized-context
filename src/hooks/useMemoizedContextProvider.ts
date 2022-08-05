@@ -12,7 +12,7 @@ export interface MemoizedContextValue<T> {
 }
 
 export interface MemoizedContextAction {
-  type: string;
+  type: any;
   data?: any;
 }
 

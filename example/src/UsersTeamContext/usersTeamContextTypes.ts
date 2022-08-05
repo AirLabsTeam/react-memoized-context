@@ -1,4 +1,8 @@
-import { defaultMemoizedContextValue, MemoizedContextType } from '../../../src/hooks/useMemoizedContextProvider';
+import {
+  defaultMemoizedContextValue,
+  MemoizedContextAction,
+  MemoizedContextType,
+} from '../../../src/hooks/useMemoizedContextProvider';
 
 export interface User {
   id: string;
@@ -26,4 +30,14 @@ export const defaultUsersTeamContextValue: UsersTeamContextType = {
   assignScore: () => {},
 };
 
-export type UserTeamContextActions = 'addUser' | 'assignScore';
+export interface AddUserAction extends MemoizedContextAction {
+  type: 'addUser';
+  data?: { user: User };
+}
+
+export interface AssignScoreAction extends MemoizedContextAction {
+  type: 'assignScore';
+  data?: { userId: User['id']; score: number };
+}
+
+export type UserTeamContextActions = AddUserAction | AssignScoreAction;

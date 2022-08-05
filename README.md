@@ -28,44 +28,119 @@ yarn add @air/react-memoized-context
 
 1. Create types for your context:
 
-- create type for value, which you want to store:
-    ```typescript
-    export interface User {
-      id: string;
-      name: string;
-      score: number;
-    }
+   - create type for value, which you want to store:
+       ```typescript
+       export interface User {
+         id: string;
+         name: string;
+         score: number;
+       }
     
-    export interface UsersTeamContextValue {
-      users: User[];
-    }
-    ```
-- create type for actions you want to provide to update value:
-    ```typescript
-    export interface UsersTeamContextActions {
-      addUser: (user: User) => void;
-      assignScore: (userId: User['id'], score: number) => void;
-    }
-    ```
-- create type for your context - remember to extend `MemoizedContextType`:
-    ```typescript
-    export interface UsersTeamContextType extends MemoizedContextType<UsersTeamContextValue>, UsersTeamContextActionsType {}
-    ```
-- create default value for your context:
-  ```typescript
-  export const defaultUsersTeamContextValue: UsersTeamContextType = {
-    ...defaultMemoizedContextValue,
-    getValue: () => ({
-      users: [],
-    }),
-    addUser: () => {},
-    assignScore: () => {},
-   };
-   ```
-- create identifiers for your actions (like string const, enums or literal types)
-```typescript
-  export type UserTeamContextActions = 'addUser' | 'assignScore';
-```
+       export interface UsersTeamContextValue {
+         users: User[];
+       }
+       ```
+   - create type for actions you want to provide to update value:
+       ```typescript
+       export interface UsersTeamContextActions {
+         addUser: (user: User) => void;
+         assignScore: (userId: User['id'], score: number) => void;
+       }
+       ```
+   - create type for your context - remember to extend `MemoizedContextType`:
+       ```typescript
+       export interface UsersTeamContextType extends MemoizedContextType<UsersTeamContextValue>, UsersTeamContextActionsType {}
+       ```
+   - create default value for your context:
+     ```typescript
+     export const defaultUsersTeamContextValue: UsersTeamContextType = {
+       ...defaultMemoizedContextValue,
+       getValue: () => ({
+         users: [],
+       }),
+       addUser: () => {},
+       assignScore: () => {},
+      };
+      ```
+   - create types for your actions:
+     ```typescript  
+     export interface AddUserAction extends MemoizedContextAction {
+       type: 'addUser';
+       data?: { user: User };
+     }
+  
+     export interface AssignScoreAction extends MemoizedContextAction {
+       type: 'assignScore';
+       data?: { userId: User['id']; score: number };
+     }
+  
+     export type UserTeamContextActions = AddUserAction | AssignScoreAction;
+     ```
 2. Create your context:
 
-- 
+    ```typescript
+    const UsersTeamContext = createContext<UsersTeamContextType>(defaultUsersTeamContextValue);
+    
+    const useUsersTeamContext = () => useContext(UsersTeamContext);
+    ```
+
+3. Create your dispatch method:
+    ```typescript
+    export const usersTeamContextDispatch = (state: UsersTeamContextValue, action: UserTeamContextActions) => {
+      switch (action.type) {
+        case 'assignScore':
+          return {
+            ...state,
+            users: state.users.map((user) => {
+              if (user.id === action.data?.userId) {
+                return {
+                  ...user,
+                  score: action.data?.score ?? 0,
+                };
+              }
+              return user;
+            }),
+          };
+        case 'addUser':
+          return {
+            ...state,
+            users: action.data ? [...state.users, action.data.user] : state.users,
+          };
+      }
+    };
+    ```
+4. Create your provider:
+    ```typescript
+    export const UsersTeamProvider = ({ children }: PropsWithChildren<{}>) => {
+      // provide default value for your context
+      const { contextValue } = useMemoizedContextProvider<UsersTeamContextValue>(
+        {
+          users: [],
+        },
+        usersTeamContextDispatch,
+      );
+    
+      // create methods which you want to expose from provider
+      const addUser = useCallback((user: User) => contextValue.dispatch({ type: 'addUser', data: user }), [contextValue]);
+    
+      const assignScore = useCallback(
+        (userId: User['id'], score: number) => contextValue.dispatch({ type: 'assignScore', data: { userId, score } }),
+        [contextValue],
+      );
+    
+      // memoize your final value that will be available for clients
+      // just return what's in contextValue and add your methods
+      const value = useMemo<UsersTeamContextType>(
+        () => ({
+          ...contextValue,
+          addUser,
+          assignScore,
+        }),
+        [addUser, assignScore, contextValue],
+      );
+    
+      return <UsersTeamContext.Provider value={value}>{children}</UsersTeamContext.Provider>;
+    };
+    ```
+
+
