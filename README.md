@@ -26,53 +26,46 @@ yarn add @air/react-memoized-context
 
 ## Usage
 
-Create a Context and Provider as usual:
+1. Create types for your context:
 
-```tsx
-interface MyProviderProps {
-  children: ReactNode;
-}
-
-interface MyContextType {
-  name: string;
-  age: number;
-}
-
-const MyContext = createContext<MyContextType>();
-
-export const MyContextProvider = ({ children }: AnnotationProviderProps) => {
-
-  const value: AnnotationContextType = useMemo(
-    () => ({
-      ...contextValue,
-      setNewAnnotation,
-      setActiveAnnotation,
-      setAnnotationType,
-      setAnnotationColor,
-      setAnnotationSize,
-      clearNewAnnotation,
-      undo,
-      setAnnotationsEnabled,
-      redo,
-      clearRevertedLines,
-      addRevertedLine,
+- create type for value, which you want to store:
+    ```typescript
+    export interface User {
+      id: string;
+      name: string;
+      score: number;
+    }
+    
+    export interface UsersTeamContextValue {
+      users: User[];
+    }
+    ```
+- create type for actions you want to provide to update value:
+    ```typescript
+    export interface UsersTeamContextActions {
+      addUser: (user: User) => void;
+      assignScore: (userId: User['id'], score: number) => void;
+    }
+    ```
+- create type for your context - remember to extend `MemoizedContextType`:
+    ```typescript
+    export interface UsersTeamContextType extends MemoizedContextType<UsersTeamContextValue>, UsersTeamContextActionsType {}
+    ```
+- create default value for your context:
+  ```typescript
+  export const defaultUsersTeamContextValue: UsersTeamContextType = {
+    ...defaultMemoizedContextValue,
+    getValue: () => ({
+      users: [],
     }),
-    [
-      addRevertedLine,
-      clearNewAnnotation,
-      clearRevertedLines,
-      contextValue,
-      redo,
-      setActiveAnnotation,
-      setAnnotationColor,
-      setAnnotationSize,
-      setAnnotationType,
-      setAnnotationsEnabled,
-      setNewAnnotation,
-      undo,
-    ],
-  );
-
-  return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
-};
+    addUser: () => {},
+    assignScore: () => {},
+   };
+   ```
+- create identifiers for your actions (like string const, enums or literal types)
+```typescript
+  export type UserTeamContextActions = 'addUser' | 'assignScore';
 ```
+2. Create your context:
+
+- 
