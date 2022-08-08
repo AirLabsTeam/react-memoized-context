@@ -2,6 +2,11 @@
   "name": "@air/react-memoized-context",
   "type": "module",
   "source": "src/index.ts",
+  "author": "Air Labs, Inc.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AirLabsTeam/react-memoized-context.git"
+  },
   "exports": {
     "require": "./dist/index.cjs",
     "default": "./dist/index.modern.js"
