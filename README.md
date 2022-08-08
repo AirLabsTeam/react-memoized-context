@@ -122,7 +122,7 @@ yarn add @air/react-memoized-context
       );
     
       // create methods you want to expose to clients
-      const addUser = useCallback((user: User) => contextValue.dispatch({ type: 'addUser', data: user }), [contextValue]);
+      const addUser = useCallback((user: User) => contextValue.dispatch({ type: 'addUser', data: { user } }), [contextValue]);
     
       const assignScore = useCallback(
         (userId: User['id'], score: number) => contextValue.dispatch({ type: 'assignScore', data: { userId, score } }),

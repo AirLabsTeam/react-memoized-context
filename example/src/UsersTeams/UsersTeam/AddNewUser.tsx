@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { useUsersTeamContext } from '../../../UsersTeamContext/usersTeamContext';
+import { useUsersTeamContext } from '../../UsersTeamContext/usersTeamContext';
 
 export const AddNewUser = memo(() => {
   const [userName, setUserName] = React.useState('');

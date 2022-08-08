@@ -21,7 +21,10 @@ export const UsersTeamProvider = ({ children }: PropsWithChildren<{}>) => {
     usersTeamContextDispatch,
   );
 
-  const addUser = useCallback((user: User) => contextValue.dispatch({ type: 'addUser', data: user }), [contextValue]);
+  const addUser = useCallback(
+    (user: User) => contextValue.dispatch({ type: 'addUser', data: { user } }),
+    [contextValue],
+  );
 
   const assignScore = useCallback(
     (userId: User['id'], score: number) => contextValue.dispatch({ type: 'assignScore', data: { userId, score } }),
