@@ -9,6 +9,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.module.js",
   "unpkg": "./dist/index.umd.js",
+  "typings": "dist/index",
   "scripts": {
     "build": "microbundle",
     "dev": "microbundle watch"
@@ -31,5 +32,8 @@
   },
   "dependencies": {
     "react-fast-compare": "^3.2.0"
-  }
+  },
+  "files": [
+    "dist"
+  ]
 }
