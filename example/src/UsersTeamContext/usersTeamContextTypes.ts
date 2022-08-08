@@ -1,11 +1,7 @@
-import {
-  defaultMemoizedContextValue,
-  MemoizedContextAction,
-  MemoizedContextType,
-} from '../../../src/hooks/useMemoizedContextProvider';
+import { defaultMemoizedContextValue, MemoizedContextAction, MemoizedContextType } from '@air/react-memoized-context';
 
 export interface User {
-  id: string;
+  id: number;
   name: string;
   score: number;
 }

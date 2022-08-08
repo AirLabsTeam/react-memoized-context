@@ -5,12 +5,12 @@ import {
   UsersTeamContextType,
   UsersTeamContextValue,
 } from './usersTeamContextTypes';
-import { useMemoizedContextProvider } from '../../../src';
+import { useMemoizedContextProvider, useMemoizedContextSelector } from '@air/react-memoized-context';
 import { usersTeamContextDispatch } from './usersTeamContextDispatch';
 
 const UsersTeamContext = createContext<UsersTeamContextType>(defaultUsersTeamContextValue);
 
-const useUsersTeamContext = () => useContext(UsersTeamContext);
+export const useUsersTeamContext = () => useContext(UsersTeamContext);
 
 export const UsersTeamProvider = ({ children }: PropsWithChildren<{}>) => {
   // provide default value for your context
@@ -39,3 +39,8 @@ export const UsersTeamProvider = ({ children }: PropsWithChildren<{}>) => {
 
   return <UsersTeamContext.Provider value={value}>{children}</UsersTeamContext.Provider>;
 };
+
+export function useUsersTeamContextSelector<T>(selector: (st: UsersTeamContextValue) => T) {
+  const context = useUsersTeamContext();
+  return useMemoizedContextSelector(context, selector);
+}

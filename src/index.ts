@@ -1,3 +1,3 @@
-import { useMemoizedContextProvider } from './hooks/useMemoizedContextProvider';
+import { useMemoizedContextProvider, defaultMemoizedContextValue } from './hooks/useMemoizedContextProvider';
 import { useMemoizedContextSelector } from './hooks/useMemoizedContextSelector';
-export { useMemoizedContextProvider, useMemoizedContextSelector };
+export { useMemoizedContextProvider, useMemoizedContextSelector, defaultMemoizedContextValue };
