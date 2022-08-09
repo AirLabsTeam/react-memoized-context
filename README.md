@@ -18,7 +18,7 @@
 Here at [Air](https://air.inc), we needed a way to store _multiple_ instances of complex global state (what React Context API does) but with the performance of Redux. `react-memoized-context` solves this problem.
 
 ### Why not React Context?
-A React Context provider renders _all_ consumers every time it's `value` changes - even if the component isn't using a property on the `value` (if it's an object). This can cause lots of performance issues and the community is trying to [solve](https://github.com/reactjs/rfcs/pull/119) [it](https://github.com/dai-shi/use-context-selector). We've looked at these other solutions but they're either not ready, had too many bugs or lacked features (like reading values on the fly) so we decided to roll our own.
+A React Context provider renders _all_ consumers every time it's `value` changes - even if the component isn't using a property on the `value` (if it's an object). This can cause lots of performance issues and the community is [trying](https://github.com/reactjs/rfcs/pull/119) to [solve it](https://github.com/dai-shi/use-context-selector). We've looked at these other solutions but they're either not ready, had too many bugs or lacked features (like reading values on the fly) so we decided to roll our own.
 
 ### Why not Redux?
 Redux is great as a global store when multiple components want to read and write to a centralized value. But when you want to have _multiple_ global values with the same structure, Redux isn't as flexible because you need to duplicate your reducers, actions, and selectors. That's where React Context is nice because you can just wrap around another Provider.
