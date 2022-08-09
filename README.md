@@ -84,7 +84,7 @@ yarn add @air/react-memoized-context
     const useUsersTeamContext = () => useContext(UsersTeamContext);
     ```
 
-3. Create your dispatch method, which modifies context value:
+3. Create your dispatch method. It should work as redux dispatch - takes an action, modifies state value and returns a new state:
     ```typescript
     export const usersTeamContextDispatch = (state: UsersTeamContextValue, action: UserTeamContextActions) => {
       switch (action.type) {
@@ -149,14 +149,14 @@ yarn add @air/react-memoized-context
     export const usersTeamUsersSelector = (state: UsersTeamContextValue) => state.users;
     ```
    
-    you can use it in your component:
+    usage in component:
     ```typescript
     const context = useUsersTeamContext();
     // pass context to useMemoizedContextSelector
     const users = useMemoizedContextSelector(context, usersTeamUsersSelector);
     ```
    
-    to simplify usage, you can create a helper:
+    to simplify it, you can create a helper:
     ```typescript
     export function useUsersTeamContextSelector<T>(selector: (st: UsersTeamContextValue) => T) {
       const context = useUsersTeamContext();
@@ -164,7 +164,7 @@ yarn add @air/react-memoized-context
     }
     
     ```
-    then, to retrieve `users` from context you can do in your component:
+    then, to retrieve `users` from context you can do:
 
     ```typescript
     const users = useUsersTeamContextSelector(usersTeamUsersSelector);
@@ -193,7 +193,7 @@ yarn add @air/react-memoized-context
     
     ```
 
-    You can read context values on the fly if you need. For example, we will create a user with users.length as id. We can use `usersTeamUsersSelector`, but the component would be rerendered every time when any user changes. We don't want that - we need just user's length. One option is to create a selector that gets users length, but again - everytime we add a user, the component will rerender, and all we need is to know users length by the time we create a user:
+    You can read context values on the fly if you need. For example, we will create a user with `users.length` as id. We can use `usersTeamUsersSelector`, but the component would be rerendered every time when any user changes. We don't want that - we need just `users` length. We could create a selector that gets users length, but again - everytime we add a user, the component will rerender. For us, it's enough to know users length by the time we create a user:
     ```typescript
      // get whole context value - it will not cause any rerender!
      const contextValue = useUsersTeamContext();
@@ -205,3 +205,14 @@ yarn add @air/react-memoized-context
         contextValue.addUser({ id: users.length + 1, name: userName, score: 0 });
       };
     ```
+
+
+## Why not Redux?
+
+Why not just use Redux? We have selectors, dispatch, state... This looks very similar, and why would you like to use our small library instead of well-tested, known library like Redux (or MobX or any other state management library)?
+We consider Redux as 'global store'. It's great to store things that are shared between multiple components used across the app. But check this scenario
+- Imagine you have a complicated component that stores some complicated data. How to store them?
+  - We can use redux - it is performant, and we can easily expose necessary data for children components. If you don't need to display any data, but you need it when user e.g. clicks a button to do something, you can read them at this point, so the component is not bound to it (thus it is not rerendered when it changes)
+  - But what if we want to use that component in two or more places with different data? If we used redux, we have one, global state - all component's instances would share it. In that case, context or state would be better. But this solution would cause a lot of unnecessary rerenders. And, you can not read data on the fly - if you need something only when user clicks, you have to bound your component to that data.   
+
+`react-memoized-context` solves these problems

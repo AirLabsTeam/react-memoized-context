@@ -44,3 +44,11 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+
+
+## Description
+
+This app is an example how to use `useMemoizedContext`. It contains two sections - 'Team 1' and 'Team 2', to which you can add users. For each user you can assign random score. 
+Each user's row and team section have a small 'Rerenders' text - it is there two show how many times each component rerenders. 
+See that if you add any user or change user's score, only that row and container rerenders - no unnecessary rerenders of other user's rows (and the other Team)
