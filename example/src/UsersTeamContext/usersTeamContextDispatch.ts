@@ -1,7 +1,6 @@
 import { UsersTeamContextValue, UserTeamContextActions } from './usersTeamContextTypes';
 
 export const usersTeamContextDispatch = (state: UsersTeamContextValue, action: UserTeamContextActions) => {
-  console.log('usersTeamContextDispatch', action);
   switch (action.type) {
     case 'assignScore':
       return {
