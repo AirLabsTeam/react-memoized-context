@@ -1,5 +1,6 @@
 {
   "name": "@air/react-memoized-context",
+  "version": "1.0.0",
   "type": "module",
   "source": "src/index.ts",
   "author": "Air Labs, Inc.",
