@@ -5,6 +5,7 @@
   <a href="https://www.npmjs.com/package/@air/react-memoized-context">
     <img src="https://img.shields.io/npm/v/@air/react-memoized-context?color=2E77FF" alt="size" />
   </a>
+  <img alt="size" src="https://img.shields.io/bundlephobia/min/@air/react-memoized-context" />
 </p>
 
 ## ✨ Features <a name="features"></a>
