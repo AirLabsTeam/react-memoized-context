@@ -11,9 +11,17 @@
 
 - Use your React Context without the additional re-renders in the consumers
 - Ability to read values out of context "on-the-fly" - useful in callbacks so you don't have to bind the UI to a context value change just to use the value in a callback
+- Redux-like pattern (reducer, actions, and selectors)
+- Built with TypeScript
 
 ## About
-React Context is a comfortable tool to use as a React developer because it comes bundled with React. And it uses a familiar pattern that you as a React develop enjoy. The [downsides](https://blog.thoughtspile.tech/2021/10/04/react-context-dangers/) of React Context are known and this was our approach at Air to solve it. We've looked at [other solutions](https://github.com/dai-shi/use-context-selector) but they've had too many issues/lacked features (like reading values on the fly) so we decided to roll our own.
+Here at [Air](https://air.inc), we needed a way to store _multiple_ instances of complex global state (what React Context API does) but with the performance of Redux. `react-memoized-context` solves this problem.
+
+### Why not React Context?
+A React Context provider renders _all_ consumers every time it's `value` changes - even if the component isn't using a property on the `value` (if it's an object). This can cause lots of performance issues and the community is [trying](https://github.com/reactjs/rfcs/pull/119) to [solve it](https://github.com/dai-shi/use-context-selector). We've looked at these other solutions but they're either not ready, had too many bugs or lacked features (like reading values on the fly) so we decided to roll our own.
+
+### Why not Redux?
+Redux is great as a global store when multiple components want to read and write to a _single_ centralized value. But when you want to have _multiple_ global values with the same structure, Redux isn't as flexible because you need to duplicate your reducers, actions, and selectors. That's where React Context is nice because you can just wrap around another Provider.
 
 ## Install
 
@@ -26,53 +34,182 @@ yarn add @air/react-memoized-context
 
 ## Usage
 
-Create a Context and Provider as usual:
+1. Create types for your context:
 
-```tsx
-interface MyProviderProps {
-  children: ReactNode;
-}
+   - create type for value, which you want to store:
+       ```typescript
+       export interface User {
+         id: string;
+         name: string;
+         score: number;
+       }
+    
+       export interface UsersTeamContextValue {
+         users: User[];
+       }
+       ```
+   - create type for actions you want to provide to update value:
+       ```typescript
+       export interface UsersTeamContextActions {
+         addUser: (user: User) => void;
+         assignScore: (userId: User['id'], score: number) => void;
+       }
+       ```
+   - create type for your context - remember to extend `MemoizedContextType`:
+       ```typescript
+       export interface UsersTeamContextType extends MemoizedContextType<UsersTeamContextValue>, UsersTeamContextActionsType {}
+       ```
+   - create default value for your context:
+     ```typescript
+     export const defaultUsersTeamContextValue: UsersTeamContextType = {
+       ...defaultMemoizedContextValue,
+       getValue: () => ({
+         users: [],
+       }),
+       addUser: () => {},
+       assignScore: () => {},
+      };
+      ```
+   - create types for your actions - you will use them to modify context value:
+     ```typescript  
+     export interface AddUserAction extends MemoizedContextAction {
+       type: 'addUser';
+       data?: { user: User };
+     }
+  
+     export interface AssignScoreAction extends MemoizedContextAction {
+       type: 'assignScore';
+       data?: { userId: User['id']; score: number };
+     }
+  
+     export type UserTeamContextActions = AddUserAction | AssignScoreAction;
+     ```
+2. Create your context:
 
-interface MyContextType {
-  name: string;
-  age: number;
-}
+    ```typescript
+    const UsersTeamContext = createContext<UsersTeamContextType>(defaultUsersTeamContextValue);
+    
+    const useUsersTeamContext = () => useContext(UsersTeamContext);
+    ```
 
-const MyContext = createContext<MyContextType>();
+3. Create your dispatch method. It should work as redux dispatch - takes an action, modifies state value and returns a new state:
+    ```typescript
+    export const usersTeamContextDispatch = (state: UsersTeamContextValue, action: UserTeamContextActions) => {
+      switch (action.type) {
+        case 'assignScore':
+          return {
+            ...state,
+            users: state.users.map((user) => {
+              if (user.id === action.data?.userId) {
+                return {
+                  ...user,
+                  score: action.data?.score ?? 0,
+                };
+              }
+              return user;
+            }),
+          };
+        case 'addUser':
+          return {
+            ...state,
+            users: action.data ? [...state.users, action.data.user] : state.users,
+          };
+      }
+    };
+    ```
+4. Create your provider:
+    ```typescript
+    export const UsersTeamProvider = ({ children }: PropsWithChildren<{}>) => {
+      
+      const { contextValue } = useMemoizedContextProvider<UsersTeamContextValue>(
+        // provide default value for your context
+        {
+          users: [],
+        },
+        usersTeamContextDispatch,
+      );
+    
+      // create methods you want to expose to clients
+      const addUser = useCallback((user: User) => contextValue.dispatch({ type: 'addUser', data: { user } }), [contextValue]);
+    
+      const assignScore = useCallback(
+        (userId: User['id'], score: number) => contextValue.dispatch({ type: 'assignScore', data: { userId, score } }),
+        [contextValue],
+      );
+    
+      // memoize your final value that will be available for clients
+      // just return what's in contextValue and add your methods
+      const value = useMemo<UsersTeamContextType>(
+        () => ({
+          ...contextValue,
+          addUser,
+          assignScore,
+        }),
+        [addUser, assignScore, contextValue],
+      );
+    
+      return <UsersTeamContext.Provider value={value}>{children}</UsersTeamContext.Provider>;
+    };
+    ```
+   
+5. To retrieve data from context, you need selectors:
+    ```typescript
+    export const usersTeamUsersSelector = (state: UsersTeamContextValue) => state.users;
+    ```
+   
+    usage in component:
+    ```typescript
+    const context = useUsersTeamContext();
+    // pass context to useMemoizedContextSelector
+    const users = useMemoizedContextSelector(context, usersTeamUsersSelector);
+    ```
+   
+    to simplify it, you can create a helper:
+    ```typescript
+    export function useUsersTeamContextSelector<T>(selector: (st: UsersTeamContextValue) => T) {
+      const context = useUsersTeamContext();
+      return useMemoizedContextSelector(context, selector);
+    }
+    
+    ```
+    then, to retrieve `users` from context you can do:
 
-export const MyContextProvider = ({ children }: AnnotationProviderProps) => {
+    ```typescript
+    const users = useUsersTeamContextSelector(usersTeamUsersSelector);
+    ```
 
-  const value: AnnotationContextType = useMemo(
-    () => ({
-      ...contextValue,
-      setNewAnnotation,
-      setActiveAnnotation,
-      setAnnotationType,
-      setAnnotationColor,
-      setAnnotationSize,
-      clearNewAnnotation,
-      undo,
-      setAnnotationsEnabled,
-      redo,
-      clearRevertedLines,
-      addRevertedLine,
-    }),
-    [
-      addRevertedLine,
-      clearNewAnnotation,
-      clearRevertedLines,
-      contextValue,
-      redo,
-      setActiveAnnotation,
-      setAnnotationColor,
-      setAnnotationSize,
-      setAnnotationType,
-      setAnnotationsEnabled,
-      setNewAnnotation,
-      undo,
-    ],
-  );
+6. Start using your context!
 
-  return <MyContext.Provider value={value}>{children}</MyContext.Provider>;
-};
-```
+    Wrap your components with your `Provider` component, as you do with React Context:
+
+    ```react
+    <UsersTeamProvider>
+        <UsersTeam name="Team 1" />
+    </UsersTeamProvider>
+    ```
+   
+    To modify context value, use any of your actions:
+
+    ```typescript
+    import { useUsersTeamContextSelector } from "./usersTeamContext";
+    
+    const { addUser } = useUsersTeamContext()
+    
+    const onClick = () => {
+      addUser({ name: 'John' })
+    }
+    
+    ```
+
+    You can read context values on the fly if you need. For example, we will create a user with `users.length` as id. We can use `usersTeamUsersSelector`, but the component would be rerendered every time when any user changes. We don't want that - we need just `users` length. We could create a selector that gets users length, but again - everytime we add a user, the component will rerender. For us, it's enough to know users length by the time we create a user:
+    ```typescript
+     // get whole context value - it will not cause any rerender!
+     const contextValue = useUsersTeamContext();
+    
+      const addNewUser = () => {
+        // read users array when we need it
+        const users = contextValue.getValue().users;
+        // call addUser action to add a new user
+        contextValue.addUser({ id: users.length + 1, name: userName, score: 0 });
+      };
+    ```
