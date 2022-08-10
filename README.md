@@ -219,5 +219,5 @@ yarn add @air/react-memoized-context
 
 ## Codesandbox
 
-You can play with the example using codesanbox:
+You can play with the example using codesandbox:
 https://codesandbox.io/s/boring-morning-j44i9p
