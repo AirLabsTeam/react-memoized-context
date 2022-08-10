@@ -214,3 +214,10 @@ yarn add @air/react-memoized-context
         contextValue.addUser({ id: users.length + 1, name: userName, score: 0 });
       };
     ```
+
+
+
+## Codesandbox
+
+You can play with the example using codesanbox:
+https://codesandbox.io/s/boring-morning-j44i9p
